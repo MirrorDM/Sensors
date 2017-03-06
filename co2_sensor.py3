@@ -6,13 +6,14 @@
     Date last modified: 03/06/2017
     Python Version: 3.5
 '''
+from __future__ import print_function
 import serial
 import serial.tools.list_ports
 import time
 import sys
 
 class CO2Sensor:
-    cmd = bytes([0xFE, 0x04, 0x00, 0x03, 0x00, 0x01, 0xD5, 0xC5])
+    cmd = bytearray([0xFE, 0x04, 0x00, 0x03, 0x00, 0x01, 0xD5, 0xC5])
     recv = 7
     baudrate = 9600
     timeout = 0.5
@@ -21,10 +22,10 @@ class CO2Sensor:
         serial_devices = serial.tools.list_ports.comports()
         print('\n ------Select COM Port------\n')
         for num, dev in enumerate(serial_devices):
-            print('   ['+str(num)+']', dev.description)
+            print('   ['+str(num)+']', dev.description, dev.device)
         print('\n ------Select COM Port------\n')
         # Select CO2 Sensor Port.
-        selected_num = input('Select CO2 Sensor, usually contains `CH340\': ')
+        selected_num = input('Select CO2 Sensor, usually contains `CH340\' or `USB2.0-Serial\': ')
         selected_num = int(selected_num)
         if selected_num >= len(serial_devices):
             print('Error device.')
