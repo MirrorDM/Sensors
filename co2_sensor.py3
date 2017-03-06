@@ -11,6 +11,7 @@ import serial
 import serial.tools.list_ports
 import time
 import sys
+import io
 
 class CO2Sensor:
     cmd = bytearray([0xFE, 0x04, 0x00, 0x03, 0x00, 0x01, 0xD5, 0xC5])
@@ -53,6 +54,8 @@ while True:
         ppm = sensor.readPPM()
         now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         print(now_time, 'CO2(ppm):', ppm)
+        with io.open('CO2.log', 'a') as f:
+            f.write(now_time + ' CO2(ppm): ' + str(ppm) + '\n')
         time.sleep(5)
     except KeyboardInterrupt as e:
         print('Keyboard Interrupted. Read Sensor Finished.')
