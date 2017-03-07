@@ -12,11 +12,13 @@ import serial.tools.list_ports
 import time
 import sys
 import io
+import crcmod
 
 class CO2Sensor:
     '''
     Passive transmission.
     Big-endian. (CRC: little-endian.)
+    CRC: CRC-16(Modbus).
 
     Send:
     =========================================================
@@ -64,13 +66,24 @@ class CO2Sensor:
         self.serial.write(self.cmd)
         sensor_data = self.serial.read(7)
         addr, func_code, length, co2_ppm, crc_low, crc_high = struct.unpack(">BBBHBB", sensor_data)
-        if addr == 0xFE and func_code == 0x04 && length == 0x02:
+        if addr == 0xFE and func_code == 0x04 and length == 0x02 and self.check(sensor_data):
             return co2_ppm
         else:
             return -1
 
     def close(self):
         self.serial.close()
+
+    @staticmethod
+    def check(data):
+        # Checksum = crc16(modbus)
+        # Only crc-checksum is little-endian.
+        # Data length: 7
+        crc_modbus = crcmod.predefined.mkCrcFun('modbus')
+        calculated_value = crc_modbus(data[:-2])
+        actual_value = struct.unpack('<5xH', data)[0]
+        return calculated_value == actual_value
+
 
 def main():
     sensor = CO2Sensor()

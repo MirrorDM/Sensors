@@ -18,7 +18,7 @@ class ParticlesSensor:
     '''
     Active transmission.
     32 bytes. Big-endian.
-    Check Number = sum(00 - 29)
+    Check Number = sum(00 - 29) (as bytes)
     =========================================================
     |  00  |  01  |  02  |  03  |  04  |  05  |  06  |  07  |
     ---------------------------------------------------------
@@ -70,15 +70,22 @@ class ParticlesSensor:
         pm1_0, pm2_5, pm10,
         cnt_03, cnt_05, cnt_10,
         cnt_25, cnt_50, cnt_100,
-        ver, err, checksum) = struct.unpack(">BBHHHHHHHHHHHHHBBH", most_recent_data)
+        ver, err, checksum) = struct.unpack('>BB13HBBH', most_recent_data)
         # Check start bytes.
-        if sign1 == 0x42 and sign2 == 0x4d:
+        if sign1 == 0x42 and sign2 == 0x4d and self.check(most_recent_data):
             return (pm1_0, pm2_5, pm10)
         else:
             return (-1, -1, -1)
 
     def close(self):
         self.serial.close()
+
+    @staticmethod
+    def check(data):
+        # Checksum = Sum(byte[0], bytes[1], ... bytes[29])
+        bytes_data = struct.unpack('>30BH', data)
+        return sum(bytes_data[:30]) == bytes_data[-1]
+
 
 def main():
     sensor = ParticlesSensor()
