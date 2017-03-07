@@ -10,6 +10,7 @@ from co2_sensor import CO2Sensor
 from particles_sensor import ParticlesSensor
 import time
 import sqlite3
+import io
 
 class SensorReader:
 
@@ -42,7 +43,13 @@ class SensorReader:
 
     def write_database(self):
         # TODO
-        pass
+        with io.open('sensor_data.log', 'a') as f:
+            f.write(self.now_time + ' CO2(ppm): ' + str(self.co2_ppm).ljust(5)
+                + ',  PM2.5-US: ' + str(self.pm2_5_us).ljust(4)
+                + ',  PM10-US: ' + str(self.pm10_us).ljust(4)
+                + ',  PM2.5-CN: ' + str(self.pm2_5_cn).ljust(4)
+                + ',  PM10-CN: ' + str(self.pm10_cn).ljust(4) + '\n'
+                )
 
     def display(self):
         print('---'+self.now_time+'---')
