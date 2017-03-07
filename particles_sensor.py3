@@ -73,9 +73,15 @@ class ParticlesSensor:
         ver, err, checksum) = struct.unpack('>BB13HBBH', most_recent_data)
         # Check start bytes.
         if sign1 == 0x42 and sign2 == 0x4d and self.check(most_recent_data):
-            return (pm1_0, pm2_5, pm10)
+            return (pm1_0_cf, pm2_5_cf, pm10_cf,
+                pm1_0, pm2_5, pm10,
+                cnt_03, cnt_05, cnt_10,
+                cnt_25, cnt_50, cnt_100)
         else:
-            return (-1, -1, -1)
+            return (-1, -1, -1
+                -1, -1, -1,
+                -1, -1, -1,
+                -1, -1, -1)
 
     def close(self):
         self.serial.close()
@@ -91,12 +97,25 @@ def main():
     sensor = ParticlesSensor()
     while True:
         try:
-            (pm1_0, pm2_5, pm10) = sensor.readPM()
+            (pm1_0_cf, pm2_5_cf, pm10_cf,
+                pm1_0, pm2_5, pm10,
+                cnt_03, cnt_05, cnt_10,
+                cnt_25, cnt_50, cnt_100) = sensor.readPM()
             now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             print(now_time)
-            print('PM1.0:', pm1_0)
-            print('PM2.5:', pm2_5)
-            print('PM10 :', pm10)
+            print('US PM1.0:', pm1_0_cf)
+            print('US PM2.5:', pm2_5_cf)
+            print('US PM10 :', pm10_cf)
+            print('CN PM1.0:', pm1_0)
+            print('CN PM2.5:', pm2_5)
+            print('CN PM10 :', pm10)
+            print('0.3um/0.1L', cnt_03)
+            print('0.5um/0.1L', cnt_05)
+            print('1.0um/0.1L', cnt_10)
+            print('2.5um/0.1L', cnt_25)
+            print('5.0um/0.1L', cnt_50)
+            print('10um/0.1L', cnt_100)
+            print('--------------------')
             time.sleep(5)
         except KeyboardInterrupt as e:
             print('Keyboard Interrupted. Read Sensor Finished.')

@@ -12,6 +12,7 @@ import serial.tools.list_ports
 import time
 import sys
 import io
+import struct
 import crcmod
 
 class CO2Sensor:
