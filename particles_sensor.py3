@@ -19,39 +19,23 @@ class ParticlesSensor:
     Active transmission.
     32 bytes. Big-endian.
     Check Number = sum(00 - 29)
-    =============================
-    |  00  |  01  |  02  |  03  |
-    -----------------------------
-    | 0x42 | 0x4d | FrameLength |
-    =============================
-    |  04  |  05  |  06  |  07  |
-    -----------------------------
-    | PM1.0  CF=1 | PM2.5  CF=1 |
-    =============================
-    |  08  |  09  |  10  |  11  |
-    -----------------------------
-    |  PM10 CF=1  |  PM1.0 Air  |
-    =============================
-    |  12  |  13  |  14  |  15  |
-    -----------------------------
-    |  PM2.5 Air  |  PM10  Air  |
-    =============================
-    |  16  |  17  |  18  |  19  |
-    -----------------------------
-    | 0.3um/0.1L  | 0.5um/0.1L  |
-    =============================
-    |  20  |  21  |  22  |  23  |
-    -----------------------------
-    | 1.0um/0.1L  | 2.5um/0.1L  |
-    =============================
-    |  24  |  25  |  26  |  27  |
-    -----------------------------
-    | 5.0um/0.1L  |  10um/0.1L  |
-    =============================
-    |  28  |  29  |  30  |  31  |
-    -----------------------------
-    | Ver. | Err. | CheckNumber |
-    =============================
+    =========================================================
+    |  00  |  01  |  02  |  03  |  04  |  05  |  06  |  07  |
+    ---------------------------------------------------------
+    | 0x42 | 0x4d | FrameLength | PM1.0  CF=1 | PM2.5  CF=1 |
+    =========================================================
+    |  08  |  09  |  10  |  11  |  12  |  13  |  14  |  15  |
+    ---------------------------------------------------------
+    |  PM10 CF=1  |  PM1.0 Air  |  PM2.5 Air  |  PM10  Air  |
+    =========================================================
+    |  16  |  17  |  18  |  19  |  20  |  21  |  22  |  23  |
+    ---------------------------------------------------------
+    | 0.3um/0.1L  | 0.5um/0.1L  | 1.0um/0.1L  | 2.5um/0.1L  |
+    =========================================================
+    |  24  |  25  |  26  |  27  |  28  |  29  |  30  |  31  |
+    ---------------------------------------------------------
+    | 5.0um/0.1L  |  10um/0.1L  | Ver. | Err. | CheckNumber |
+    =========================================================
     '''
 
     baudrate = 9600
@@ -87,7 +71,7 @@ class ParticlesSensor:
         cnt_03, cnt_05, cnt_10,
         cnt_25, cnt_50, cnt_100,
         ver, err, checksum) = struct.unpack(">BBHHHHHHHHHHHHHBBH", most_recent_data)
-
+        # Check start bytes.
         if sign1 == 0x42 and sign2 == 0x4d:
             return (pm1_0, pm2_5, pm10)
         else:
@@ -96,18 +80,21 @@ class ParticlesSensor:
     def close(self):
         self.serial.close()
 
-sensor = ParticlesSensor()
+def main():
+    sensor = ParticlesSensor()
+    while True:
+        try:
+            (pm1_0, pm2_5, pm10) = sensor.readPM()
+            now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            print(now_time)
+            print('PM1.0:', pm1_0)
+            print('PM2.5:', pm2_5)
+            print('PM10 :', pm10)
+            time.sleep(5)
+        except KeyboardInterrupt as e:
+            print('Keyboard Interrupted. Read Sensor Finished.')
+            sensor.close()
+            break
 
-while True:
-    try:
-        (pm1_0, pm2_5, pm10) = sensor.readPM()
-        now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        print(now_time)
-        print('PM1.0:', pm1_0)
-        print('PM2.5:', pm2_5)
-        print('PM10 :', pm10)
-        time.sleep(1)
-    except KeyboardInterrupt as e:
-        print('Keyboard Interrupted. Read Sensor Finished.')
-        sensor.close()
-        break
+if __name__ == '__main__':
+    main()

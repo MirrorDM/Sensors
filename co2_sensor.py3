@@ -14,7 +14,31 @@ import sys
 import io
 
 class CO2Sensor:
+    '''
+    Passive transmission.
+    Big-endian. (CRC: little-endian.)
 
+    Send:
+    =========================================================
+    |  00  |  01  |  02  |  03  |  04  |  05  |  06  |  07  |
+    ---------------------------------------------------------
+    | 0xFE | 0x04 |Start Address| NumberOfReg |     CRC     |
+    =========================================================
+
+    CO2 read Example:
+    =========================================================
+    |  00  |  01  |  02  |  03  |  04  |  05  |  06  |  07  |
+    ---------------------------------------------------------
+    | 0xFE | 0x04 | 0x00 | 0x03 | 0x00 | 0x01 | 0xD5 | 0xC5 |
+    =========================================================
+
+    Receive:
+    ==================================================
+    |  00  |  01  |  02  |  03  |  04  |  05  |  06  |
+    --------------------------------------------------
+    | 0xFE | 0x04 |Length|   CO2(ppm)  |     CRC     |
+    ==================================================
+    '''
     cmd = bytearray([0xFE, 0x04, 0x00, 0x03, 0x00, 0x01, 0xD5, 0xC5])
     baudrate = 9600
     timeout = 0.5
@@ -38,27 +62,30 @@ class CO2Sensor:
 
     def readPPM(self):
         self.serial.write(self.cmd)
-        output = self.serial.read(7)
-        if output[0] == 0xFE and output[1] == 0x04 and output[2] == 0x02:
-            ppm = (output[3] << 8) + output[4]
-            return ppm
+        sensor_data = self.serial.read(7)
+        addr, func_code, length, co2_ppm, crc_low, crc_high = struct.unpack(">BBBHBB", sensor_data)
+        if addr == 0xFE and func_code == 0x04 && length == 0x02:
+            return co2_ppm
         else:
             return -1
 
     def close(self):
         self.serial.close()
 
-sensor = CO2Sensor()
+def main():
+    sensor = CO2Sensor()
+    while True:
+        try:
+            ppm = sensor.readPPM()
+            now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            print(now_time, 'CO2(ppm):', ppm)
+            with io.open('CO2.log', 'a') as f:
+                f.write(now_time + ' CO2(ppm): ' + str(ppm) + '\n')
+            time.sleep(5)
+        except KeyboardInterrupt as e:
+            print('Keyboard Interrupted. Read Sensor Finished.')
+            sensor.close()
+            break
 
-while True:
-    try:
-        ppm = sensor.readPPM()
-        now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        print(now_time, 'CO2(ppm):', ppm)
-        with io.open('CO2.log', 'a') as f:
-            f.write(now_time + ' CO2(ppm): ' + str(ppm) + '\n')
-        time.sleep(5)
-    except KeyboardInterrupt as e:
-        print('Keyboard Interrupted. Read Sensor Finished.')
-        sensor.close()
-        break
+if __name__ == '__main__':
+    main()
