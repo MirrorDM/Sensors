@@ -93,8 +93,6 @@ def main():
             ppm = sensor.readPPM()
             now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             print(now_time, 'CO2(ppm):', ppm)
-            with io.open('CO2.log', 'a') as f:
-                f.write(now_time + ' CO2(ppm): ' + str(ppm) + '\n')
             time.sleep(5)
         except KeyboardInterrupt as e:
             print('Keyboard Interrupted. Read Sensor Finished.')
