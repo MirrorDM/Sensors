@@ -14,10 +14,11 @@ import sys
 import io
 
 class CO2Sensor:
+
     cmd = bytearray([0xFE, 0x04, 0x00, 0x03, 0x00, 0x01, 0xD5, 0xC5])
-    recv = 7
     baudrate = 9600
     timeout = 0.5
+
     def __init__(self):
         # List COM Ports.
         serial_devices = serial.tools.list_ports.comports()
@@ -26,7 +27,7 @@ class CO2Sensor:
             print('   ['+str(num)+']', dev.description, dev.device)
         print('\n ------Select COM Port------\n')
         # Select CO2 Sensor Port.
-        selected_num = input('Select CO2 Sensor, usually contains `CH340\' or `USB2.0-Serial\': ')
+        selected_num = input('Select CO2 Sensor, usually contains `CH340\' or `USB-Serial\': ')
         selected_num = int(selected_num)
         if selected_num >= len(serial_devices):
             print('Error device.')
@@ -37,7 +38,7 @@ class CO2Sensor:
 
     def readPPM(self):
         self.serial.write(self.cmd)
-        output = self.serial.read(self.recv)
+        output = self.serial.read(7)
         if output[0] == 0xFE and output[1] == 0x04 and output[2] == 0x02:
             ppm = (output[3] << 8) + output[4]
             return ppm
