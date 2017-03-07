@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 '''
-    File name: pm_sensor.py3
+    File name: pm_sensor.py
     Author: MirrorDM
-    Date created: 03/06/2017
-    Date last modified: 03/06/2017
+    Date created: 03/07/2017
+    Date last modified: 03/08/2017
     Python Version: 3.5
 '''
 from __future__ import print_function
@@ -39,16 +39,16 @@ class ParticlesSensor:
     '''
 
     baudrate = 9600
-    timeout = None
+    timeout = 3
 
     def __init__(self):
 
         # List COM Ports.
         serial_devices = serial.tools.list_ports.comports()
-        print('\n ------Select COM Port------\n')
+        print('\n ------Select Particle\'s Port------\n')
         for num, dev in enumerate(serial_devices):
             print('   ['+str(num)+']', dev.description, dev.device)
-        print('\n ------Select COM Port------\n')
+        print('\n ------Select Particle\'s Port------\n')
         # Select PM Sensor Port.
         selected_num = input('Select PM Sensor, usually contains `CH340\' or `USB-Serial\': ')
         selected_num = int(selected_num)
@@ -66,15 +66,15 @@ class ParticlesSensor:
         else:
             most_recent_data = self.serial.read(32)
         (sign1, sign2, frame_length,
-        pm1_0_cf, pm2_5_cf, pm10_cf,
-        pm1_0, pm2_5, pm10,
+        pm1_0_us, pm2_5_us, pm10_us,
+        pm1_0_cn, pm2_5_cn, pm10_cn,
         cnt_03, cnt_05, cnt_10,
         cnt_25, cnt_50, cnt_100,
         ver, err, checksum) = struct.unpack('>BB13HBBH', most_recent_data)
         # Check start bytes.
         if sign1 == 0x42 and sign2 == 0x4d and self.check(most_recent_data):
-            return (pm1_0_cf, pm2_5_cf, pm10_cf,
-                pm1_0, pm2_5, pm10,
+            return (pm1_0_us, pm2_5_us, pm10_us,
+                pm1_0_cn, pm2_5_cn, pm10_cn,
                 cnt_03, cnt_05, cnt_10,
                 cnt_25, cnt_50, cnt_100)
         else:
@@ -97,18 +97,18 @@ def main():
     sensor = ParticlesSensor()
     while True:
         try:
-            (pm1_0_cf, pm2_5_cf, pm10_cf,
-                pm1_0, pm2_5, pm10,
+            (pm1_0_us, pm2_5_us, pm10_us,
+                pm1_0_cn, pm2_5_cn, pm10_cn,
                 cnt_03, cnt_05, cnt_10,
                 cnt_25, cnt_50, cnt_100) = sensor.readPM()
             now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             print(now_time)
-            print('US PM1.0:', pm1_0_cf)
-            print('US PM2.5:', pm2_5_cf)
-            print('US PM10 :', pm10_cf)
-            print('CN PM1.0:', pm1_0)
-            print('CN PM2.5:', pm2_5)
-            print('CN PM10 :', pm10)
+            print('US PM1.0:', pm1_0_us)
+            print('US PM2.5:', pm2_5_us)
+            print('US PM10 :', pm10_us)
+            print('CN PM1.0:', pm1_0_cn)
+            print('CN PM2.5:', pm2_5_cn)
+            print('CN PM10 :', pm10_cn)
             print('0.3um/0.1L', cnt_03)
             print('0.5um/0.1L', cnt_05)
             print('1.0um/0.1L', cnt_10)

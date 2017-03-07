@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 '''
-    File name: co2_sensor.py3
+    File name: co2_sensor.py
     Author: MirrorDM
     Date created: 03/06/2017
-    Date last modified: 03/06/2017
+    Date last modified: 03/08/2017
     Python Version: 3.5
 '''
 from __future__ import print_function
@@ -49,10 +49,10 @@ class CO2Sensor:
     def __init__(self):
         # List COM Ports.
         serial_devices = serial.tools.list_ports.comports()
-        print('\n ------Select COM Port------\n')
+        print('\n ------Select CO2\'s Port------\n')
         for num, dev in enumerate(serial_devices):
             print('   ['+str(num)+']', dev.description, dev.device)
-        print('\n ------Select COM Port------\n')
+        print('\n ------Select CO2\'s Port------\n')
         # Select CO2 Sensor Port.
         selected_num = input('Select CO2 Sensor, usually contains `CH340\' or `USB-Serial\': ')
         selected_num = int(selected_num)
