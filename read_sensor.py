@@ -8,8 +8,8 @@
 '''
 from co2_sensor import CO2Sensor
 from particles_sensor import ParticlesSensor
+from simple_database import SimpleDatabase
 import time
-import sqlite3
 import io
 
 class SensorReader:
@@ -19,6 +19,7 @@ class SensorReader:
     def __init__(self):
         self.co2_sensor = CO2Sensor()
         self.particles_sensor = ParticlesSensor()
+        self.database = SimpleDatabase()
 
     def get_time(self):
         self.now_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -42,14 +43,10 @@ class SensorReader:
         self.write_database()
 
     def write_database(self):
-        # TODO
-        with io.open('sensor_data.log', 'a') as f:
-            f.write(self.now_time + ' CO2(ppm): ' + str(self.co2_ppm).ljust(5)
-                + ',  PM2.5-US: ' + str(self.pm2_5_us).ljust(4)
-                + ',  PM10-US: ' + str(self.pm10_us).ljust(4)
-                + ',  PM2.5-CN: ' + str(self.pm2_5_cn).ljust(4)
-                + ',  PM10-CN: ' + str(self.pm10_cn).ljust(4) + '\n'
-                )
+        timestamp = int(time.time())
+        self.database.insert_data(timestamp=timestamp, co2=self.co2_ppm,
+            pm25_us=self.pm2_5_us, pm25_cn=self.pm2_5_cn,
+            pm100_us=self.pm10_us, pm100_cn=self.pm10_cn)
 
     def display(self):
         print('---'+self.now_time+'---')
@@ -68,6 +65,7 @@ class SensorReader:
                 print('Keyboard Interrupted. Read Sensor Finished.')
                 self.co2_sensor.close()
                 self.particles_sensor.close()
+                self.database.close()
                 break
 
 def main():
