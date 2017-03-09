@@ -29,9 +29,14 @@ pm25us = [line[2] for line in data]
 plt.plot(dt_x, co2)
 plt.show()
 
+max_len = 300
+while len(dt_x) > max_len:
+    dt_x = dt_x[::2]
+    co2 = co2[::2]
+    pm25us = pm25us[::2]
 # Plot double
 fig, laxis = plt.subplots()
 raxis = laxis.twinx()
-laxis.plot(dt_x, co2)
-raxis.plot(dt_x, pm25us)
+laxis.plot(dt_x, co2, 'b')
+raxis.plot(dt_x, pm25us, 'g')
 plt.show()
