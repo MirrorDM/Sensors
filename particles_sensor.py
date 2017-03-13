@@ -40,26 +40,37 @@ class ParticlesSensor:
 
     baudrate = 9600
     timeout = 3
+    no_data = tuple([None]*12)
 
     def __init__(self):
 
         # List COM Ports.
         serial_devices = serial.tools.list_ports.comports()
         print('\n ------Select Particle\'s Port------\n')
-        for num, dev in enumerate(serial_devices):
+        for num, dev in enumerate(serial_devices, 1):
             print('   ['+str(num)+']', dev.description, dev.device)
         print('\n ------Select Particle\'s Port------\n')
         # Select PM Sensor Port.
-        selected_num = input('Select PM Sensor, usually contains `CH340\' or `USB-Serial\': ')
-        selected_num = int(selected_num)
+        selected_num = input('Select PM Sensor, usually contains `CH340\' or `USB-Serial\'\n[0] for no sensor: ')
+        selected_num = int(selected_num) - 1
+        # Input 0, seleted_num is -1
+        if selected_num < 0:
+            self.is_open = False
+            return
+        # Input larger than range. Exit.
         if selected_num >= len(serial_devices):
             print('Error device.')
             sys.exit(1)
         # Init serial device.
         self.port = serial_devices[selected_num].device
         self.serial = serial.Serial(port=self.port, baudrate=self.baudrate, timeout=self.timeout)
+        self.is_open = True
 
     def readPM(self):
+        # No data
+        if not self.is_open:
+            return self.no_data
+
         all_data = self.serial.read_all()
         if len(all_data) >= 32:
             most_recent_data = all_data[-32:]
@@ -77,14 +88,13 @@ class ParticlesSensor:
                 pm1_0_cn, pm2_5_cn, pm10_cn,
                 cnt_03, cnt_05, cnt_10,
                 cnt_25, cnt_50, cnt_100)
+        # No valid data
         else:
-            return (-1, -1, -1
-                -1, -1, -1,
-                -1, -1, -1,
-                -1, -1, -1)
+            return self.no_data
 
     def close(self):
-        self.serial.close()
+        if self.is_open:
+            self.serial.close()
 
     @staticmethod
     def check(data):

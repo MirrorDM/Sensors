@@ -45,6 +45,7 @@ class CO2Sensor:
     cmd = bytearray([0xFE, 0x04, 0x00, 0x03, 0x00, 0x01, 0xD5, 0xC5])
     baudrate = 9600
     timeout = 0.5
+    no_data = None
 
     def __init__(self):
         # List COM Ports.
@@ -54,26 +55,37 @@ class CO2Sensor:
             print('   ['+str(num)+']', dev.description, dev.device)
         print('\n ------Select CO2\'s Port------\n')
         # Select CO2 Sensor Port.
-        selected_num = input('Select CO2 Sensor, usually contains `CH340\' or `USB-Serial\': ')
-        selected_num = int(selected_num)
+        selected_num = input('Select CO2 Sensor, usually contains `CH340\' or `USB-Serial\'\n[0] for no sensor: ')
+        selected_num = int(selected_num) - 1
+        # Input 0, seleted_num is -1
+        if selected_num < 0:
+            self.is_open = False
+            return
+        # Input larger than range. Exit.
         if selected_num >= len(serial_devices):
             print('Error device.')
             sys.exit(1)
         # Init serial device.
         self.port = serial_devices[selected_num].device
         self.serial = serial.Serial(port=self.port, baudrate=self.baudrate, timeout=self.timeout)
+        self.is_open = True
 
     def readPPM(self):
+        # No data
+        if not self.is_open:
+            return self.no_data
+
         self.serial.write(self.cmd)
         sensor_data = self.serial.read(7)
         addr, func_code, length, co2_ppm, crc_low, crc_high = struct.unpack(">BBBHBB", sensor_data)
         if addr == 0xFE and func_code == 0x04 and length == 0x02 and self.check(sensor_data):
             return co2_ppm
         else:
-            return -1
+            return self.no_data
 
     def close(self):
-        self.serial.close()
+        if self.is_open:
+            self.serial.close()
 
     @staticmethod
     def check(data):
