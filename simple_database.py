@@ -23,16 +23,19 @@ class SimpleDatabase:
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
         table_list = set(self.cursor.fetchall())
         # Create table if not exist.
+        exist_air_table = False
         for res_tuple in table_list:
-            if 'Air' not in res_tuple:
-                self.cursor.execute("""CREATE TABLE Air
-                    (TIME_STAMP BIGINT PRIMARY KEY  NOT NULL,
-                    CO2 INT,
-                    PM25_US INT,
-                    PM25_CN INT,
-                    PM100_US INT,
-                    PM100_CN INT);""")
-                self.conn.commit()
+            if 'Air' in res_tuple:
+                exist_air_table = True
+        if not exist_air_table:
+            self.cursor.execute("""CREATE TABLE Air
+                (TIME_STAMP BIGINT PRIMARY KEY  NOT NULL,
+                CO2 INT,
+                PM25_US INT,
+                PM25_CN INT,
+                PM100_US INT,
+                PM100_CN INT);""")
+            self.conn.commit()
 
     def insert_data(self, timestamp, co2=None,
         pm25_us=None, pm25_cn=None,
