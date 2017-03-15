@@ -52,8 +52,8 @@ class SensorReader:
         print('---'+self.now_time+'---')
         print('CO2     :', self.co2_ppm)
         print('PM2.5 US:', self.pm2_5_us)
-        print('PM10  US:', self.pm10_us)
         print('PM2.5 CN:', self.pm2_5_cn)
+        print('PM10  US:', self.pm10_us)
         print('PM10  CN:', self.pm10_cn)
 
     def run(self):
