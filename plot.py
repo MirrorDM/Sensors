@@ -42,18 +42,30 @@ while len(dt_x) > max_len:
     co2 = co2[::2]
     pm25us = pm25us[::2]
 # Plot double
-fig, laxis = plt.subplots()
-laxis.plot(dt_x, co2, 'b', label='CO2')
-laxis.legend(loc='upper left')
-laxis.set_xlabel('Time')
-laxis.set_ylabel('CO2')
+fig, axes = plt.subplots(2, 1, figsize=(8, 8))
+fig.suptitle('Air Quality')
 
-raxis = laxis.twinx()
-raxis.plot(dt_x, pm25us, 'g', label='PM2.5')
-raxis.legend(loc='upper right')
-raxis.set_ylabel('PM2.5')
+axes[0].plot(dt_x, co2, 'b', label='CO2')
+axes[0].legend(loc=1)
+axes[0].set_ylabel('CO2')
+axes[0].set_title('CO2 Level')
 
-plt.title('Air Quality')
+axes[1].plot(dt_x, pm25us, 'g', label='PM2.5')
+axes[1].legend(loc=1)
+axes[1].set_ylabel('PM2.5')
+axes[1].set_title('PM2.5 Index - US Standard')
+
+# fig, laxis = plt.subplots()
+# laxis.plot(dt_x, co2, 'b', label='CO2')
+# laxis.legend(loc='upper left')
+# laxis.set_xlabel('Time')
+# laxis.set_ylabel('CO2')
+
+# raxis = laxis.twinx()
+# raxis.plot(dt_x, pm25us, 'g', label='PM2.5')
+# raxis.legend(loc='upper right')
+# raxis.set_ylabel('PM2.5')
+
 plt.show()
 
 conn.close()
