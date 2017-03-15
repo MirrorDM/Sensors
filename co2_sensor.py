@@ -51,7 +51,7 @@ class CO2Sensor:
         # List COM Ports.
         serial_devices = serial.tools.list_ports.comports()
         print('\n ------Select CO2\'s Port------\n')
-        for num, dev in enumerate(serial_devices):
+        for num, dev in enumerate(serial_devices, 1):
             print('   ['+str(num)+']', dev.description, dev.device)
         print('\n ------Select CO2\'s Port------\n')
         # Select CO2 Sensor Port.
